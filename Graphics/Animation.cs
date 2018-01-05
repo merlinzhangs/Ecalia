@@ -39,7 +39,10 @@ namespace Ecalia.Graphics
 
         public float GetDelay(WZObject wz)
         {
-            return Delay = DataTool.GetInt(wz["delay"]);
+            if (wz.HasChild("delay"))
+                return Delay = DataTool.GetInt(wz["delay"]);
+            else
+                return 0;
         }
     }
 }

@@ -109,11 +109,11 @@ namespace Ecalia.Graphics
 
         private void PlayAnimations(CCEventCustom eventCustom)
         {
-            CCAnimate Animate = new CCAnimate(animation);
-            Animate.Duration = 100;
-            animation.Loops = 10;
-            AddChild(objects[0]);
-            objects[0].RunAction(Animate);
+            //CCAnimate Animate = new CCAnimate(animation);
+            //Animate.Duration = 100;
+            //animation.Loops = 10;
+            //AddChild(objects[0]);
+            //objects[0].RunAction(Animate);
         }
 
         private void InitEventListeners()
@@ -158,7 +158,7 @@ namespace Ecalia.Graphics
 
             foreach (var back in background)
             {
-                Console.WriteLine(back.Name);
+                //Console.WriteLine(back.Name);
                 var map = mapBackground.LoadFromNode((WZSubProperty)background[back.Name]);
                 spriteBatchNode.AddChild(new CCSprite(
                     spriteManager.GenerateTexture2D(((
@@ -176,39 +176,42 @@ namespace Ecalia.Graphics
         /// <param name="wzImage"></param>
         private void LoadObjects(WZImage wzImage)
         {
-
-            foreach (var obj in wzImage["obj"])
+            for (int i = 0; i < 8; i++)
             {
-                //Console.WriteLine(obj.Name);
-                var mapobj = mapObjects.LoadFromNode((WZSubProperty)wzImage["obj"][obj.Name]); 
-                Console.WriteLine("{0}->{1}->{2}->{3}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2);
-                var location = mapFile.MainDirectory["Obj"][mapobj.oS + ".img"][mapobj.l0][mapobj.l1][mapobj.l2];
-                if (location.ChildCount > 1)
+                var map = wzImage[i.ToString()]["obj"];
+                foreach (var obj in map)
                 {
-                    foreach (var canvas in location)
+                    //Console.WriteLine(obj.Name);
+                    var mapobj = mapObjects.LoadFromNode((WZSubProperty)map[obj.Name]);
+                    //Console.WriteLine("{0}->{1}->{2}->{3}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2);
+                    var location = mapFile.MainDirectory["Obj"][mapobj.oS + ".img"][mapobj.l0][mapobj.l1][mapobj.l2];
+                    if (location.ChildCount > 1)
                     {
-                        if (canvas is WZCanvasProperty) // TODO: Improve.
+                        foreach (var canvas in location)
                         {
-                            objects.Add(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
+                            if (canvas is WZCanvasProperty) // TODO: Improve.
                             {
-                                Position = new CCPoint(mapobj.x, mapobj.y),
-                                ZOrder = mapobj.z,
-                            });
-                            animation.AddFrame(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value)), animation.GetDelay(canvas));
+                                objects.Add(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
+                                {
+                                    Position = new CCPoint(mapobj.x, -mapobj.y),
+                                    VertexZ = mapobj.z,
+                                });
+                                animation.AddFrame(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value)), animation.GetDelay(canvas));
+                            }
                         }
                     }
-                }
-                else
-                {
-                    foreach (var canvas in location)
+                    else
                     {
-                        if (canvas is WZCanvasProperty)
+                        foreach (var canvas in location)
                         {
-                            spriteBatchNode.AddChild(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
+                            if (canvas is WZCanvasProperty)
                             {
-                                Position = new CCPoint(mapobj.x, mapobj.y),
-                                ZOrder = mapobj.z,
-                            });
+                                spriteBatchNode.AddChild(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
+                                {
+                                    Position = new CCPoint(mapobj.x, -mapobj.y),
+                                    ZOrder = mapobj.z,
+                                });
+                            }
                         }
                     }
                 }
@@ -217,27 +220,31 @@ namespace Ecalia.Graphics
 
         private void LoadTiles(WZImage map)
         {
-            var tiles = map["tile"] as WZSubProperty;
-            Console.WriteLine("Node: {0}", tiles.Name);
-            foreach (var tile in tiles)
+            for (int i = 0; i < 8; i++)
             {
-                Console.WriteLine("Tile: {0}", tile.Name);
-                var mapTile = mapTiles.LoadFromNode((WZSubProperty)tiles[tile.Name]);
-                mapTile.tS = DataTool.GetString(map["info"]["tS"]);
-                Console.WriteLine("{0}:{1}:{2}", mapTile.tS, mapTile.u, mapTile.no.ToString());
-                var location = mapFile.MainDirectory["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];
+                Console.WriteLine(i);
 
+                var tiles = map[i.ToString()]["tile"];
+                Console.WriteLine("Node: {0}", tiles.Name);
+
+                foreach (var tile in tiles)
+                {
+                    Console.WriteLine("Tile: {0}", tile.Name);
+                    var mapTile = mapTiles.LoadFromNode((WZSubProperty)tiles[tile.Name]);
+                    mapTile.tS = DataTool.GetString(map["0"]["info"]["tS"]);
+                    Console.WriteLine("{0}:{1}:{2}", mapTile.tS, mapTile.u, mapTile.no.ToString());
+                    var location = mapFile.MainDirectory["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];
 
                     if (location is WZCanvasProperty)
                     {
-                        Console.WriteLine("{0}:{1}", mapTile.x, mapTile.y);
+                        Console.WriteLine("{0}:{1}", mapTile.x, -mapTile.y);
                         spriteBatchNode.AddChild(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)location).Value))
                         {
-                            Position = new CCPoint(mapTile.x, mapTile.y),
-                            //ZOrder = mapTile.zM,
+                            Position = new CCPoint(mapTile.x, -mapTile.y),
+                            ZOrder = mapTile.zM,
                         });
                     }
-                
+                }
             }
         }
 
