@@ -29,6 +29,7 @@ namespace Ecalia.Graphics
         SpriteList objects = new SpriteList();
         SpriteList backgrounds = new SpriteList();
         Multimap<string, CCSprite> ani = new Multimap<string, CCSprite>();
+        List<string> MapObjLocation = new List<string>();
         
 
         // Events
@@ -109,6 +110,7 @@ namespace Ecalia.Graphics
 
         private void PlayAnimations(CCEventCustom eventCustom)
         {
+            /*
             CCAnimation[] animation = new CCAnimation[ani.Count()];
             CCAnimate[] animate = new CCAnimate[ani.Count()];
             CCSprite[] sprite = new CCSprite[ani.Count()];
@@ -127,8 +129,28 @@ namespace Ecalia.Graphics
                 animate[i] = new CCAnimate(animation[i]);
                 AddChild(ani[i.ToString()].First());
                 ani[i.ToString()].First().RunAction(new CCRepeatForever(animate[i]));
-            }
+            }*/
 
+            CCAnimation[] animation = new CCAnimation[ani.Count()];
+            CCAnimate[] animate = new CCAnimate[ani.Count()];
+            CCSprite[] sprite = new CCSprite[ani.Count()];
+
+            for (int i = 0; i < ani.Count(); i++)
+            {
+                sprite[i] = new CCSprite();
+                animation[i] = new CCAnimation();
+                var s = MapObjLocation.Distinct().ToList()[i];
+
+                foreach (CCSprite spr in ani[s])
+                {
+                    animation[i].AddSpriteFrame(spr);
+                    animation[i].DelayPerUnit = 0.3f;
+                }
+
+                animate[i] = new CCAnimate(animation[i]);
+                AddChild(ani[s].First());
+                ani[s].First().RunAction(new CCRepeatForever(animate[i]));
+            }
             
         }
 
@@ -147,7 +169,7 @@ namespace Ecalia.Graphics
         {
             LoadBackground(mapImg);
             LoadObjects(mapImg);
-            //LoadTiles(mapImg);
+            LoadTiles(mapImg);
             AddChild(spriteBatchNode);
             // When Finished
             DispatchEvent("PlayAnimation");
@@ -192,7 +214,7 @@ namespace Ecalia.Graphics
         /// <param name="wzImage"></param>
         private void LoadObjects(WZImage wzImage)
         {
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 8; i++)
             {
                 var map = wzImage[i.ToString()]["obj"];
                 foreach (var obj in map)
@@ -205,14 +227,15 @@ namespace Ecalia.Graphics
                     {
                         foreach (var canvas in location)
                         {
-                            Console.WriteLine("{0}->{1}->{2}->{3}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2);
+                            //Console.WriteLine("{0}->{1}->{2}->{3}->{4}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2, canvas.Name);
                             if (canvas is WZCanvasProperty) // TODO: Improve.
                             {
+                                MapObjLocation.Add(mapobj.oS + ":" + mapobj.l0 + ":" + mapobj.l1 + ":" + mapobj.l2);
                                 //Console.WriteLine(location.Name);
                                 //var tex = spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value);
                                 //sprFrame.Add(new CCSpriteFrame(tex, new CCRect(0, 0, tex.PixelsWide, tex.PixelsHigh)));
-                                ani.Add(i.ToString(), new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
-                                { Position = new CCPoint(mapobj.x, -mapobj.y) });
+                                ani.Add(mapobj.oS + ":" + mapobj.l0 + ":" + mapobj.l1 + ":" + mapobj.l2, new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
+                                { Position = new CCPoint(mapobj.x, -mapobj.y), ZOrder = mapobj.z });
                             }
                         }
                     }
@@ -257,6 +280,7 @@ namespace Ecalia.Graphics
                         spriteBatchNode.AddChild(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)location).Value))
                         {
                             Position = new CCPoint(mapTile.x, -mapTile.y),
+                            ZOrder = -1
                         });
                     }
                 }
