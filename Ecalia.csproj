@@ -44,13 +44,12 @@
   <ItemGroup>
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Camera.cs" />
-    <Compile Include="Graphics\Animation.cs" />
     <Compile Include="Graphics\Map.cs" />
     <Compile Include="Graphics\SpriteManager.cs" />
-    <Compile Include="IntroLayer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tools\AnimationList.cs" />
+    <Compile Include="Tools\MultiMap.cs" />
+    <Compile Include="Tools\SpriteList.cs" />
     <Compile Include="Tools\DataTool.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -64,52 +63,82 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="BitMiracle.LibTiff.NET, Version=2.3.624.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\BitMiracle.LibTiff.NET.dll</HintPath>
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\BitMiracle.LibTiff.NET.dll</HintPath>
     </Reference>
     <Reference Include="box2d, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\box2d.dll</HintPath>
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\box2d.dll</HintPath>
     </Reference>
-    <Reference Include="CocosSharp, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\CocosSharp.dll</HintPath>
+    <Reference Include="CocosSharp, Version=1.6.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\CocosSharp.dll</HintPath>
     </Reference>
     <Reference Include="Lidgren.Network, Version=2012.1.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\Lidgren.Network.dll</HintPath>
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\Lidgren.Network.dll</HintPath>
     </Reference>
     <Reference Include="MonoGame.Framework, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\MonoGame.Framework.dll</HintPath>
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="MonoGame.Framework.Net, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\MonoGame.Framework.Net.dll</HintPath>
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\MonoGame.Framework.Net.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.dll</HintPath>
+    <Reference Include="OpenGL.Net, Version=0.7.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenGL.Net.0.7.1\lib\net461\OpenGL.Net.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct2D1, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.Direct2D1.dll</HintPath>
+    <Reference Include="OpenGL.Net.CoreUI, Version=0.7.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenGL.Net.CoreUI.0.7.1\lib\net461\OpenGL.Net.CoreUI.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct3D11, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.Direct3D11.dll</HintPath>
+    <Reference Include="OpenGL.Net.Math, Version=0.7.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenGL.Net.Math.0.7.1\lib\net461\OpenGL.Net.Math.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct3D9, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.Direct3D9.dll</HintPath>
+    <Reference Include="OpenGL.Net.WinForms, Version=0.7.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenGL.Net.WinForms.0.7.1\lib\net461\OpenGL.Net.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.DXGI, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.DXGI.dll</HintPath>
+    <Reference Include="SharpDX, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SharpDX.MediaFoundation, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.MediaFoundation.dll</HintPath>
+    <Reference Include="SharpDX.Direct2D1, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.Direct2D1.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SharpDX.RawInput, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.RawInput.dll</HintPath>
+    <Reference Include="SharpDX.Direct3D11, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.Direct3D11.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SharpDX.XAudio2, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.XAudio2.dll</HintPath>
+    <Reference Include="SharpDX.Direct3D9, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.Direct3D9.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SharpDX.XInput, Version=2.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CocosSharp.PCL.Shared.1.5.0.1\lib\net40\SharpDX.XInput.dll</HintPath>
+    <Reference Include="SharpDX.DXGI, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.DXGI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX.MediaFoundation, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.MediaFoundation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX.RawInput, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.RawInput.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX.XAudio2, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.XAudio2.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX.XInput, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.XInput.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.3.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.3.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>

@@ -17,7 +17,6 @@ namespace Ecalia.Graphics
         private Background mapBackground;
         private MapObjects mapObjects;
         private MapTiles mapTiles;
-        private Animation animation;
         private CCSpriteBatchNode spriteBatchNode;
 
         // Wz 
@@ -27,8 +26,10 @@ namespace Ecalia.Graphics
         private WZImage objectImg;
 
         // Lists
-        AnimationList objects = new AnimationList();
-        AnimationList backgrounds = new AnimationList();
+        SpriteList objects = new SpriteList();
+        SpriteList backgrounds = new SpriteList();
+        Multimap<string, CCSprite> ani = new Multimap<string, CCSprite>();
+        
 
         // Events
         protected CCEventListenerKeyboard keyboard;
@@ -49,7 +50,6 @@ namespace Ecalia.Graphics
         {
             spriteManager = new SpriteManager(); // Handles Drawing Functions
             keyboard = new CCEventListenerKeyboard();
-            animation = new Animation();
             spriteBatchNode = new CCSpriteBatchNode();
             
 
@@ -109,11 +109,27 @@ namespace Ecalia.Graphics
 
         private void PlayAnimations(CCEventCustom eventCustom)
         {
-            //CCAnimate Animate = new CCAnimate(animation);
-            //Animate.Duration = 100;
-            //animation.Loops = 10;
-            //AddChild(objects[0]);
-            //objects[0].RunAction(Animate);
+            CCAnimation[] animation = new CCAnimation[ani.Count()];
+            CCAnimate[] animate = new CCAnimate[ani.Count()];
+            CCSprite[] sprite = new CCSprite[ani.Count()];
+
+            for (int i = 0; i < ani.Count(); i++)
+            {
+                sprite[i] = new CCSprite();
+                animation[i] = new CCAnimation();
+                
+                foreach (CCSprite spr in ani[i.ToString()])
+                {
+                    animation[i].AddSpriteFrame(spr);
+                    animation[i].DelayPerUnit = 0.2f;
+                }
+
+                animate[i] = new CCAnimate(animation[i]);
+                AddChild(ani[i.ToString()].First());
+                ani[i.ToString()].First().RunAction(new CCRepeatForever(animate[i]));
+            }
+
+            
         }
 
         private void InitEventListeners()
@@ -131,7 +147,7 @@ namespace Ecalia.Graphics
         {
             LoadBackground(mapImg);
             LoadObjects(mapImg);
-            LoadTiles(mapImg);
+            //LoadTiles(mapImg);
             AddChild(spriteBatchNode);
             // When Finished
             DispatchEvent("PlayAnimation");
@@ -176,7 +192,7 @@ namespace Ecalia.Graphics
         /// <param name="wzImage"></param>
         private void LoadObjects(WZImage wzImage)
         {
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 7; i++)
             {
                 var map = wzImage[i.ToString()]["obj"];
                 foreach (var obj in map)
@@ -189,14 +205,14 @@ namespace Ecalia.Graphics
                     {
                         foreach (var canvas in location)
                         {
+                            Console.WriteLine("{0}->{1}->{2}->{3}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2);
                             if (canvas is WZCanvasProperty) // TODO: Improve.
                             {
-                                objects.Add(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
-                                {
-                                    Position = new CCPoint(mapobj.x, -mapobj.y),
-                                    VertexZ = mapobj.z,
-                                });
-                                animation.AddFrame(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value)), animation.GetDelay(canvas));
+                                //Console.WriteLine(location.Name);
+                                //var tex = spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value);
+                                //sprFrame.Add(new CCSpriteFrame(tex, new CCRect(0, 0, tex.PixelsWide, tex.PixelsHigh)));
+                                ani.Add(i.ToString(), new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
+                                { Position = new CCPoint(mapobj.x, -mapobj.y) });
                             }
                         }
                     }
@@ -225,14 +241,14 @@ namespace Ecalia.Graphics
                 Console.WriteLine(i);
 
                 var tiles = map[i.ToString()]["tile"];
-                Console.WriteLine("Node: {0}", tiles.Name);
+                //Console.WriteLine("Node: {0}", tiles.Name);
 
                 foreach (var tile in tiles)
                 {
-                    Console.WriteLine("Tile: {0}", tile.Name);
+                    //Console.WriteLine("Tile: {0}", tile.Name);
                     var mapTile = mapTiles.LoadFromNode((WZSubProperty)tiles[tile.Name]);
                     mapTile.tS = DataTool.GetString(map["0"]["info"]["tS"]);
-                    Console.WriteLine("{0}:{1}:{2}", mapTile.tS, mapTile.u, mapTile.no.ToString());
+                    //Console.WriteLine("{0}:{1}:{2}", mapTile.tS, mapTile.u, mapTile.no.ToString());
                     var location = mapFile.MainDirectory["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];
 
                     if (location is WZCanvasProperty)
@@ -241,7 +257,6 @@ namespace Ecalia.Graphics
                         spriteBatchNode.AddChild(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)location).Value))
                         {
                             Position = new CCPoint(mapTile.x, -mapTile.y),
-                            ZOrder = mapTile.zM,
                         });
                     }
                 }

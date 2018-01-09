@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Ecalia.Tools
 {
-    public class AnimationList : List<CCSprite>
+    public class SpriteList : List<CCSprite>
     {
         
     }
