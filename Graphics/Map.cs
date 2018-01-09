@@ -24,6 +24,7 @@ namespace Ecalia.Graphics
         private WZImage mapImg;
         private WZImage backgroundImg;
         private WZImage objectImg;
+        private WZPointProperty origin;
 
         // Lists
         SpriteList objects = new SpriteList();
@@ -227,6 +228,18 @@ namespace Ecalia.Graphics
                     {
                         foreach (var canvas in location)
                         {
+
+                            if (canvas.HasChild("z"))
+                            {
+                                if (DataTool.GetInt(canvas["z"]) != 0)
+                                    mapobj.z = DataTool.GetInt(location["z"]);
+                                else
+                                    mapobj.z = mapobj.zM;
+                            }
+
+                            if (canvas.HasChild("origin"))
+                                origin = canvas["origin"] as WZPointProperty;
+
                             //Console.WriteLine("{0}->{1}->{2}->{3}->{4}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2, canvas.Name);
                             if (canvas is WZCanvasProperty) // TODO: Improve.
                             {
@@ -235,7 +248,10 @@ namespace Ecalia.Graphics
                                 //var tex = spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value);
                                 //sprFrame.Add(new CCSpriteFrame(tex, new CCRect(0, 0, tex.PixelsWide, tex.PixelsHigh)));
                                 ani.Add(mapobj.oS + ":" + mapobj.l0 + ":" + mapobj.l1 + ":" + mapobj.l2, new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
-                                { Position = new CCPoint(mapobj.x, -mapobj.y), ZOrder = mapobj.z });
+                                {
+                                    Position = new CCPoint(mapobj.x - origin.Value.X, -mapobj.y + origin.Value.Y),
+                                    ZOrder = mapobj.z
+                                });
                             }
                         }
                     }
@@ -245,9 +261,20 @@ namespace Ecalia.Graphics
                         {
                             if (canvas is WZCanvasProperty)
                             {
+                                if (canvas.HasChild("z"))
+                                {
+                                    if (DataTool.GetInt(canvas["z"]) != 0)
+                                        mapobj.z = DataTool.GetInt(location["z"]);
+                                    else
+                                        mapobj.z = mapobj.zM;
+                                }
+
+                                if (canvas.HasChild("origin"))
+                                    origin = canvas["origin"] as WZPointProperty;
+
                                 spriteBatchNode.AddChild(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value))
                                 {
-                                    Position = new CCPoint(mapobj.x, -mapobj.y),
+                                    Position = new CCPoint(mapobj.x - origin.Value.X, -mapobj.y + origin.Value.Y),
                                     ZOrder = mapobj.z,
                                 });
                             }
@@ -276,11 +303,22 @@ namespace Ecalia.Graphics
 
                     if (location is WZCanvasProperty)
                     {
-                        Console.WriteLine("{0}:{1}", mapTile.x, -mapTile.y);
+                        //Console.WriteLine("{0}:{1}", mapTile.x, -mapTile.y);
+
+                        if (location.HasChild("z"))
+                        {
+                            if (DataTool.GetInt(location["z"]) != 0)
+                                mapTile.zM = DataTool.GetInt(location["z"]);
+                        }
+
+                        if (location.HasChild("origin"))
+                            origin = location["origin"] as WZPointProperty;
+
                         spriteBatchNode.AddChild(new CCSprite(spriteManager.GenerateTexture2D(((WZCanvasProperty)location).Value))
                         {
-                            Position = new CCPoint(mapTile.x, -mapTile.y),
-                            ZOrder = -1
+                            Position = new CCPoint(mapTile.x - origin.Value.X, -mapTile.y + origin.Value.Y),
+                            ZOrder = mapTile.zM,
+                           // VertexZ = mapTile.zM
                         });
                     }
                 }
