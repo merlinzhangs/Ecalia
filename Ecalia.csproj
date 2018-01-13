@@ -46,6 +46,8 @@
   <ItemGroup>
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Application.cs" />
+    <Compile Include="Character\Camera.cs" />
+    <Compile Include="Character\InputHandler.cs" />
     <Compile Include="GameManager.cs" />
     <Compile Include="Game\Map.cs" />
     <Compile Include="Graphics\Texture2D.cs" />
@@ -104,9 +106,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Dependencies\Motion\MotionNET\MotionNET.csproj">
+      <Project>{a947192e-0ddb-4a4f-a90d-ed5491e826a9}</Project>
+      <Name>MotionNET</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dependencies\ms-reWZ\reWZ.csproj">
       <Project>{85f7fe6d-63ac-44a1-83d2-ce5204e7535e}</Project>
       <Name>reWZ</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dependencies\NetEXT\NetEXT\NetEXT.csproj">
+      <Project>{4d638969-ce8b-4b71-9cae-c441abfa2b93}</Project>
+      <Name>NetEXT</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Dependencies\NetworkComms.Net\NetworkCommsDotNet\NetworkCommsDotNet.csproj">
       <Project>{7db00305-f5ed-4545-9d83-542132c8177e}</Project>

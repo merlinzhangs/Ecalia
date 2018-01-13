@@ -1,5 +1,7 @@
-﻿using Ecalia.Game;
+﻿using Ecalia.Character;
+using Ecalia.Game;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
@@ -17,11 +19,15 @@ namespace Ecalia
     {
         private static RenderWindow window;
         private Map map = new Map();
+        private InputHandler input;
+        private View view = new View(new Vector2f(0, 300), new Vector2f(800, 600));
+        private RectangleShape random = new RectangleShape(new Vector2f(100, 100));
 
         public Application(string title = "window", uint width = 800, uint height = 600)
             : base(new VideoMode(width, height), title)
         {
             window = this;
+            input = new InputHandler();
         }
 
         /// <summary>
@@ -29,42 +35,20 @@ namespace Ecalia
         /// </summary>
         public void Init()
         {
-            
-            //SetActive(false);
-            //Thread render = new Thread(new ThreadStart(OnRender));
-            //render.Start();
-            //render.Join();
-
-            InitNetwork(); // TODO: Multi-Thread this
+            //InitNetwork(); // TODO: Multi-Thread this
             InitEvents();
-            InitOpenGL();
-
-            while (IsOpen)
-            {
-                WaitAndDispatchEvents();
-                if (PollEvent(out var @event))
-                {
-                    switch(@event.Type)
-                    {
-                        case EventType.Closed:
-                            OnWindowClosed();
-                            break;
-                    }
-                    Clear(Color.Cyan);
-                    Draw();
-                    Display();
-                    Update();
-                }
-            }
+            //InitOpenGL();
+            OnRender(); // Game Loop
         }
 
         /// <summary>
-        /// Rendering on a different thread
+        /// Game loop
         /// </summary>
         private void OnRender()
         {
             while (IsOpen)
             {
+                WaitAndDispatchEvents();
                 Clear(Color.Cyan);
                 Draw();
                 Display();
@@ -72,18 +56,34 @@ namespace Ecalia
             }
         }
 
+        /// <summary>
+        /// Initializes the network
+        /// </summary>
         private void InitNetwork()
         {
+
         }
 
         private void InitEvents()
         {
             Closed += Window_Closed;
+            KeyPressed += Application_KeyPressed;
+            KeyReleased += Application_KeyReleased;
+        }
+
+        private void Application_KeyReleased(object sender, KeyEventArgs e)
+        {
+            
+        }
+
+        private void Application_KeyPressed(object sender, KeyEventArgs e)
+        {
+            input.HandleInput(e, view);
         }
 
         private void InitOpenGL()
         {
-            SetActive();
+            SetActive(false);
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -98,7 +98,9 @@ namespace Ecalia
 
         protected virtual void Update()
         {
-
+            //view.Center = random.Position;
+            SetView(view);
+            //Draw(random);
         }
 
         private void OnWindowClosed()

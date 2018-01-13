@@ -45,7 +45,7 @@ namespace Ecalia.Game
         {
             // If there's testing going on, use the specified ID, if not use the correct ID
             if (Config.developerMode)
-                mapId = 20000;
+                mapId = 10000;
             else
                 mapId = id;
 
@@ -110,8 +110,9 @@ namespace Ecalia.Game
         public void OnLoad()
         {
             LoadBackground(mapImg);
-            //LoadObjects(mapImg);
+            
             LoadTiles(mapImg);
+LoadObjects(mapImg);
             //AddChild(spriteBatchNode);
             // When Finished
             //DispatchEvent("PlayAnimation");
@@ -154,6 +155,7 @@ namespace Ecalia.Game
                 {
                     Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
                     Position = new SFML.System.Vector2f(map.x, map.y),
+                    Color = new Color(0xFF, 0xFF, 0xFF, (byte)map.a),
                 });
                 //Sprite spr = new Sprite(Texture2D.LoadTexture(false, canvas.Value));
                 //backgrounds.Add(int.Parse(back.Name), spr);
@@ -222,6 +224,11 @@ namespace Ecalia.Game
 
                                 if (canvas.HasChild("origin"))
                                     origin = canvas["origin"] as WZPointProperty;
+                                Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)canvas).Value))
+                                {
+                                    Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
+                                    Position = new SFML.System.Vector2f(mapobj.x, mapobj.y),
+                                });
                             }
                         }
                     }
