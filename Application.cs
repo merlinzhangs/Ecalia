@@ -38,6 +38,7 @@ namespace Ecalia
             //InitNetwork(); // TODO: Multi-Thread this
             InitEvents();
             //InitOpenGL();
+            map.OnLoad();
             OnRender(); // Game Loop
         }
 
@@ -93,7 +94,8 @@ namespace Ecalia
 
         protected virtual void Draw()
         {
-            map.OnLoad();
+            //map.OnLoad();
+            map.Draw();
         }
 
         protected virtual void Update()

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SFML.Graphics;
 using SFML.Window;
+using static SFML.Window.Keyboard;
 
 namespace Ecalia.Character
 {
@@ -16,18 +17,18 @@ namespace Ecalia.Character
             var y = 0;
             switch (e.Code)
             {
-                case Keyboard.Key.Left:
+                case Key.Left:
                     x -= 100;
                     player.Move(new SFML.System.Vector2f(x, y));
                     break;
-                case Keyboard.Key.Right:
+                case Key.Right:
                     x += 100;
                     player.Move(new SFML.System.Vector2f(x, y));
 
                     break;
-                case Keyboard.Key.Up:
+                case Key.Up:
                     break;
-                case Keyboard.Key.Down:
+                case Key.Down:
                     break;
             }
         }

@@ -18,6 +18,8 @@ namespace Ecalia.Game
         private Background mapBackground;
         private MapObjects mapObjects;
         private MapTiles mapTiles;
+        private SpriteBatch batch = new SpriteBatch();
+        SpriteBatch spriteBatch = new SpriteBatch();
         //private CCSpriteBatchNode spriteBatchNode; // Even if it's depreceted it's still pretty handy IMO
 
         // Wz 
@@ -27,6 +29,8 @@ namespace Ecalia.Game
 
         // Lists
         Multimap<int, Sprite> backgrounds = new Multimap<int, Sprite>();
+        Multimap<int, Sprite> objects = new Multimap<int, Sprite>();
+        Multimap<int, Sprite> mtiles = new Multimap<int, Sprite>();
         List<string> MapObjLocation = new List<string>();
         
 
@@ -52,7 +56,7 @@ namespace Ecalia.Game
 
             mapImg = mapFile.MainDirectory["Map"]["Map" + GetMapName(mapId)[0]][GetMapName(mapId) + ".img"] as WZImage; // Get's the Map Image
 
-            mapBackground = new Background(); // Loads the Background
+            mapBackground = new Background();
             mapObjects = new MapObjects();
             mapTiles = new MapTiles();
         }
@@ -110,12 +114,8 @@ namespace Ecalia.Game
         public void OnLoad()
         {
             LoadBackground(mapImg);
-            
             LoadTiles(mapImg);
-LoadObjects(mapImg);
-            //AddChild(spriteBatchNode);
-            // When Finished
-            //DispatchEvent("PlayAnimation");
+            //LoadObjects(mapImg);
         }
 
         #region Background
@@ -134,32 +134,23 @@ LoadObjects(mapImg);
                 var map = mapBackground.LoadFromNode((WZSubProperty)background[back.Name]);
                 WZCanvasProperty canvas = mapFile.MainDirectory["Back"][map.bS + ".img"]["back"][map.no.ToString()] as WZCanvasProperty;
 
-                /*if (canvas.HasChild("z"))
-                {
-                    if (DataTool.GetInt(canvas["z"]) == 0)
-                        map.z = map.zM;
-                    else
-                        map.z = DataTool.GetInt(canvas["z"]);
-                }*/
-
-                /*AddChild(new CCSprite(spriteManager.GenerateTexture2D((canvas.Value)))
-                {
-                    Position = new CCPoint(map.x, InvertY(map.y)),
-                    //ZOrder = map.z,
-                });*/
-
                 if (canvas.HasChild("origin"))
                     origin = canvas["origin"] as WZPointProperty;
 
-                Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, canvas.Value))
+                /*Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, canvas.Value))
+                {
+                    Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
+                    Position = new SFML.System.Vector2f(map.x, map.y),
+                    Color = new Color(0xFF, 0xFF, 0xFF, (byte)map.a),
+                });*/
+
+                batch.AddChild(new Sprite(Texture2D.LoadTexture(false, canvas.Value))
                 {
                     Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
                     Position = new SFML.System.Vector2f(map.x, map.y),
                     Color = new Color(0xFF, 0xFF, 0xFF, (byte)map.a),
                 });
-                //Sprite spr = new Sprite(Texture2D.LoadTexture(false, canvas.Value));
-                //backgrounds.Add(int.Parse(back.Name), spr);
-                
+
             }
         }
 
@@ -201,7 +192,7 @@ LoadObjects(mapImg);
                             //Console.WriteLine("{0}->{1}->{2}->{3}->{4}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2, canvas.Name);
                             if (canvas is WZCanvasProperty) // TODO: Improve.
                             {
-                                MapObjLocation.Add(mapobj.oS + ":" + mapobj.l0 + ":" + mapobj.l1 + ":" + mapobj.l2);
+                                //MapObjLocation.Add(mapobj.oS + ":" + mapobj.l0 + ":" + mapobj.l1 + ":" + mapobj.l2);
                                 //Console.WriteLine(location.Name);
                                 //var tex = spriteManager.GenerateTexture2D(((WZCanvasProperty)canvas).Value);
                                 //sprFrame.Add(new CCSpriteFrame(tex, new CCRect(0, 0, tex.PixelsWide, tex.PixelsHigh)));
@@ -242,48 +233,61 @@ LoadObjects(mapImg);
 
         private void LoadTiles(WZImage map)
         {
-            for (int i = 0; i < 8; i++) // Supposed to be 7..but I don't feel like changing it.
+            for (int i = 0; i < 8; ++i) // Supposed to be 7..but I don't feel like changing it.
             {
                 //Console.WriteLine(i);
 
                 var tiles = map[i.ToString()]["tile"];
                 //Console.WriteLine("Node: {0}", tiles.Name);
-
-                foreach (var tile in tiles)
+                if (map[i.ToString()]["info"].HasChild("tS"))
                 {
-                    //Console.WriteLine("Tile: {0}", tile.Name);
-                    var mapTile = mapTiles.LoadFromNode((WZSubProperty)tiles[tile.Name]);
-                    mapTile.tS = DataTool.GetString(map["0"]["info"]["tS"]);
-                    //Console.WriteLine("{0}:{1}:{2}", mapTile.tS, mapTile.u, mapTile.no.ToString());
-                    var location = mapFile.MainDirectory["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];
-
-                    if (location is WZCanvasProperty)
+                    foreach (var tile in tiles)
                     {
-                        //Console.WriteLine("{0}:{1}", mapTile.x, mapTile.y);
+                        //Console.WriteLine("Tile: {0}", tile.Name);
+                        var mapTile = mapTiles.LoadFromNode((WZSubProperty)tiles[tile.Name]);
+                        mapTile.tS = DataTool.GetString(map[i.ToString()]["info"]["tS"]);
+                        //Console.WriteLine("{0}:{1}:{2}", mapTile.tS, mapTile.u, mapTile.no.ToString());
+                        var location = mapFile.MainDirectory["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];
 
-                        if (location.HasChild("z"))
+                        if (location is WZCanvasProperty)
                         {
-                            if (DataTool.GetInt(location["z"]) == 0)
-                                mapTile.z = mapTile.zM;
-                            else
-                                mapTile.z = DataTool.GetInt(location["z"]);
+                            //Console.WriteLine("{0}:{1}", mapTile.x, mapTile.y);
+
+                            if (location.HasChild("z"))
+                            {
+                                if (DataTool.GetInt(location["z"]) == 0)
+                                    mapTile.z = mapTile.zM;
+                                else
+                                    mapTile.z = DataTool.GetInt(location["z"]);
+                            }
+
+                            if (location.HasChild("origin"))
+                                origin = location["origin"] as WZPointProperty;
+
+                            /*Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)location).Value))
+                            {
+                                Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
+                                Position = new SFML.System.Vector2f(mapTile.x, mapTile.y),
+                            });*/
+
+                            spriteBatch.AddChild(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)location).Value))
+                            {
+                                Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
+                                Position = new SFML.System.Vector2f(mapTile.x, mapTile.y),
+                            }, mapTile.z);
                         }
-
-                        if (location.HasChild("origin"))
-                            origin = location["origin"] as WZPointProperty;
-
-                        Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)location).Value))
-                        {
-                            Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
-                            Position = new SFML.System.Vector2f(mapTile.x, mapTile.y),
-                            
-                        });
                     }
                 }
             }
         }
 
         #endregion
+
+        public void Draw()
+        {
+            batch.Draw(SpriteBatch.DrawOrder.UNSORTED);
+            spriteBatch.Draw(SpriteBatch.DrawOrder.SORTED);
+        }
 
         /// <summary>
         /// Get's the string version of the map id.
@@ -297,11 +301,6 @@ LoadObjects(mapImg);
             if (mapid.ToString().Length == 7)
                 return "00" + mapid;
             return mapid.ToString();
-        }
-
-        private float InvertY(float ypos)
-        {
-            return 0 - ypos;
         }
     }
 
@@ -380,6 +379,9 @@ LoadObjects(mapImg);
 
     #region MapObjects Class
 
+    /// <summary>
+    /// Loads Map Object(s) information
+    /// </summary>
     public class MapObjects
     {
         public string oS { get; set; } // background set
@@ -425,6 +427,9 @@ LoadObjects(mapImg);
 
     #region MapTiles Class
 
+    /// <summary>
+    /// Loads map tile information
+    /// </summary>
     public class MapTiles
     {
 

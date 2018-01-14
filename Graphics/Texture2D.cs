@@ -13,7 +13,7 @@ namespace Ecalia.Graphics
     /// <summary>
     /// Used to Load Textures into the SFML Texture Class
     /// </summary>
-    public static class Texture2D 
+    public static class Texture2D
     {
         public static Stream LoadFromStream(Bitmap bitmap)
         {
@@ -33,7 +33,13 @@ namespace Ecalia.Graphics
             }
         }
 
-        public static Texture LoadTexture(bool fromStream, Bitmap bitmap)
+        /// <summary>
+        /// Loads texture
+        /// </summary>
+        /// <param name="fromStream">Load using stream or byte[].</param>
+        /// <param name="bitmap">The image</param>
+        /// <returns></returns>
+        public static Texture LoadTexture(bool fromStream = false, Bitmap bitmap = null)
         {
             Texture texture;
 
