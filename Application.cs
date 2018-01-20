@@ -37,7 +37,7 @@ namespace Ecalia
         {
             //InitNetwork(); // TODO: Multi-Thread this
             InitEvents();
-            //InitOpenGL();
+            InitOpenGL();
             map.OnLoad();
             OnRender(); // Game Loop
         }
@@ -84,7 +84,7 @@ namespace Ecalia
 
         private void InitOpenGL()
         {
-            SetActive(false);
+            SetActive();
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -107,6 +107,7 @@ namespace Ecalia
 
         private void OnWindowClosed()
         {
+            map.Dispose();
             Close();
         }
 

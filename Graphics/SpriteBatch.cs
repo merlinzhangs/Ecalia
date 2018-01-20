@@ -10,54 +10,67 @@ namespace Ecalia.Graphics
 {
 
     /// <summary>
-    /// PROTOTYPE: Draws multiple objects at the same time. Using only ONE OPENGL Draw Call
+    /// PROTOTYPE: Draws multiple objects at the same time. Using only ONE-TWO OPENGL Draw Call(s)
     /// </summary>
     public class SpriteBatch : IDisposable
     {
         Multimap<int, Drawable> sorted = new Multimap<int, Drawable>();
         List<Drawable> list = new List<Drawable>();
+        private DrawOrder drawOrder;
+        MultiMap<Drawable> map = new MultiMap<Drawable>();
 
-        public SpriteBatch()
+        /// <summary>
+        /// Initializes SpriteBatch class
+        /// </summary>
+        public SpriteBatch(DrawOrder order)
         {
-
+            drawOrder = order;
         }
 
-        public void AddChild(Drawable sprite)
+        /// <summary>
+        /// Adds a drawable to sequence
+        /// </summary>
+        /// <param name="sprite"></param>
+        /// <param name="zOrder"></param>
+        public void AddChild(Drawable sprite, int zOrder = 0)
         {
-            list.Add(sprite);
+            if (drawOrder == DrawOrder.UNSORTED)
+                list.Add(sprite);
+            else
+                sorted.Add(zOrder, sprite);
         }
 
-        public void AddChild(Drawable sprite, int zOrder)
-        {
-            sorted.Add(zOrder, sprite);
-        }
-
-        public void Draw(DrawOrder drawOrder)
+        /// <summary>
+        /// Draw all the Drawable objects
+        /// </summary>
+        public void Draw()
         {
             if (drawOrder == DrawOrder.UNSORTED)
             {
                 foreach (Drawable d in list)
-                {
-                    Application.Window.Draw(d);
-                }
+                    Application.Window.Draw(d, RenderStates.Default);
             }
 
             if (drawOrder == DrawOrder.SORTED)
             {
-                for (int i = 0; i < sorted.Keys.Count; i++)
+                
+                var keys = sorted.Keys.ToList();
+                keys.Sort();
+
+                foreach (var key in keys)//sorted.Keys)
                 {
-                    foreach (int key in sorted.Keys)
-                    {
-                        foreach (Drawable d in sorted[key])
-                            Application.Window.Draw(d);
-                    }
-                }
+                    Console.WriteLine("Key: {0}", key);
+                    foreach (Drawable d in sorted[key].Reverse().AsQueryable())
+                        Application.Window.Draw(d, RenderStates.Default);
+                } 
+
             }
         }
 
         public void Dispose()
         {
-
+            sorted.Clear();
+            list.Clear();
         }
 
         public enum DrawOrder

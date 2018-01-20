@@ -18,9 +18,9 @@ namespace Ecalia.Game
         private Background mapBackground;
         private MapObjects mapObjects;
         private MapTiles mapTiles;
-        private SpriteBatch batch = new SpriteBatch();
-        SpriteBatch spriteBatch = new SpriteBatch();
-        //private CCSpriteBatchNode spriteBatchNode; // Even if it's depreceted it's still pretty handy IMO
+        private SpriteBatch backgrounds = new SpriteBatch(SpriteBatch.DrawOrder.UNSORTED);
+        private SpriteBatch images = new SpriteBatch(SpriteBatch.DrawOrder.SORTED);
+        private SpriteBatch tileset = new SpriteBatch(SpriteBatch.DrawOrder.UNSORTED);
 
         // Wz 
         protected WZFile mapFile = new WZFile(Path.Combine(Config.wzFolder, "Map.wz"), WZVariant.GMS, true); // I know I can do Path.Combine, but I don't really feel like it.
@@ -28,9 +28,9 @@ namespace Ecalia.Game
         private WZPointProperty origin;
 
         // Lists
-        Multimap<int, Sprite> backgrounds = new Multimap<int, Sprite>();
-        Multimap<int, Sprite> objects = new Multimap<int, Sprite>();
-        Multimap<int, Sprite> mtiles = new Multimap<int, Sprite>();
+        //Multimap<int, Sprite> backgrounds = new Multimap<int, Sprite>();
+        //Multimap<int, Sprite> objects = new Multimap<int, Sprite>();
+        //Multimap<int, Sprite> mtiles = new Multimap<int, Sprite>();
         List<string> MapObjLocation = new List<string>();
         
 
@@ -115,7 +115,7 @@ namespace Ecalia.Game
         {
             LoadBackground(mapImg);
             LoadTiles(mapImg);
-            //LoadObjects(mapImg);
+            LoadObjects(mapImg);
         }
 
         #region Background
@@ -133,23 +133,18 @@ namespace Ecalia.Game
                 //Console.WriteLine(back.Name);
                 var map = mapBackground.LoadFromNode((WZSubProperty)background[back.Name]);
                 WZCanvasProperty canvas = mapFile.MainDirectory["Back"][map.bS + ".img"]["back"][map.no.ToString()] as WZCanvasProperty;
-
+                var z = 0;
                 if (canvas.HasChild("origin"))
                     origin = canvas["origin"] as WZPointProperty;
+                if (canvas.HasChild("z"))
+                    z = DataTool.GetInt(canvas["z"]);
 
-                /*Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, canvas.Value))
+                backgrounds.AddChild(new Sprite(Texture2D.LoadTexture(false, canvas.Value))
                 {
                     Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
                     Position = new SFML.System.Vector2f(map.x, map.y),
                     Color = new Color(0xFF, 0xFF, 0xFF, (byte)map.a),
-                });*/
-
-                batch.AddChild(new Sprite(Texture2D.LoadTexture(false, canvas.Value))
-                {
-                    Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
-                    Position = new SFML.System.Vector2f(map.x, map.y),
-                    Color = new Color(0xFF, 0xFF, 0xFF, (byte)map.a),
-                });
+                }, z);
 
             }
         }
@@ -178,13 +173,13 @@ namespace Ecalia.Game
                         foreach (var canvas in location)
                         {
 
-                            if (canvas.HasChild("z"))
+                            /*if (canvas.HasChild("z"))
                             {
                                 if (DataTool.GetInt(canvas["z"]) != 0)
                                     mapobj.z = DataTool.GetInt(location["z"]);
                                 else
                                     mapobj.z = mapobj.zM;
-                            }
+                            }*/
 
                             if (canvas.HasChild("origin"))
                                 origin = canvas["origin"] as WZPointProperty;
@@ -205,21 +200,22 @@ namespace Ecalia.Game
                         {
                             if (canvas is WZCanvasProperty)
                             {
-                                if (canvas.HasChild("z"))
+                                /*if (canvas.HasChild("z"))
                                 {
-                                    if (DataTool.GetInt(canvas["z"]) != 0)
-                                        mapobj.z = DataTool.GetInt(location["z"]);
-                                    else
+                                    if (DataTool.GetInt(canvas["z"]) == 0)
                                         mapobj.z = mapobj.zM;
-                                }
+                                    else
+                                        mapobj.z = DataTool.GetInt(canvas["z"]);
+                                }*/
 
                                 if (canvas.HasChild("origin"))
                                     origin = canvas["origin"] as WZPointProperty;
-                                Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)canvas).Value))
+
+                                images.AddChild(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)canvas).Value))
                                 {
                                     Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
                                     Position = new SFML.System.Vector2f(mapobj.x, mapobj.y),
-                                });
+                                }, mapobj.z);
                             }
                         }
                     }
@@ -254,27 +250,18 @@ namespace Ecalia.Game
                             //Console.WriteLine("{0}:{1}", mapTile.x, mapTile.y);
 
                             if (location.HasChild("z"))
-                            {
-                                if (DataTool.GetInt(location["z"]) == 0)
-                                    mapTile.z = mapTile.zM;
-                                else
-                                    mapTile.z = DataTool.GetInt(location["z"]);
-                            }
+                                mapTile.z = DataTool.GetInt(location["z"]);
+                            Console.WriteLine("Z: {0} ZM:{1}", mapTile.z, mapTile.zM);
 
                             if (location.HasChild("origin"))
                                 origin = location["origin"] as WZPointProperty;
 
-                            /*Application.Window.Draw(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)location).Value))
-                            {
-                                Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
-                                Position = new SFML.System.Vector2f(mapTile.x, mapTile.y),
-                            });*/
 
-                            spriteBatch.AddChild(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)location).Value))
+                            tileset.AddChild(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)location).Value))
                             {
                                 Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
                                 Position = new SFML.System.Vector2f(mapTile.x, mapTile.y),
-                            }, mapTile.z);
+                            }, mapTile.z == 0 ? Math.Min(mapTile.z, 0) : Math.Max(-1, mapTile.zM));
                         }
                     }
                 }
@@ -285,8 +272,17 @@ namespace Ecalia.Game
 
         public void Draw()
         {
-            batch.Draw(SpriteBatch.DrawOrder.UNSORTED);
-            spriteBatch.Draw(SpriteBatch.DrawOrder.SORTED);
+            //backgrounds.Draw();
+            tileset.Draw();
+            //images.Draw();
+        }
+
+        public void Dispose()
+        {
+            backgrounds.Dispose();
+            tileset.Dispose();
+            images.Dispose();
+            mapFile.Dispose();
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 using static SFML.Window.Keyboard;
 
@@ -19,16 +20,20 @@ namespace Ecalia.Character
             {
                 case Key.Left:
                     x -= 100;
-                    player.Move(new SFML.System.Vector2f(x, y));
+                    player.Move(new Vector2f(x, y));
                     break;
                 case Key.Right:
                     x += 100;
-                    player.Move(new SFML.System.Vector2f(x, y));
+                    player.Move(new Vector2f(x, y));
 
                     break;
                 case Key.Up:
+                    y -= 100;
+                    player.Move(new Vector2f(x, y));
                     break;
                 case Key.Down:
+                    y += 100;
+                    player.Move(new Vector2f(x, y));
                     break;
             }
         }
