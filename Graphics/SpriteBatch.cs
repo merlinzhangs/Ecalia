@@ -56,10 +56,6 @@ namespace Ecalia.Graphics
             {
                 
                 var keys = sorted.Keys.ToList();
-
-                if (dt == DrawType.OBJECTS)
-                    keys.Sort();
-
                 foreach (var key in keys)//sorted.Keys)
                 {
                     //Console.WriteLine("Key: {0}", key);

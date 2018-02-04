@@ -21,7 +21,6 @@ namespace Ecalia
         private Map map = new Map();
         private InputHandler input;
         private View view = new View(new Vector2f(0, 300), new Vector2f(800, 600));
-        private RectangleShape random = new RectangleShape(new Vector2f(100, 100));
 
         public Application(string title = "window", uint width = 800, uint height = 600)
             : base(new VideoMode(width, height), title)
