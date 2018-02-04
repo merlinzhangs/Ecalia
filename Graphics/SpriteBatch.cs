@@ -14,17 +14,18 @@ namespace Ecalia.Graphics
     /// </summary>
     public class SpriteBatch : IDisposable
     {
-        Multimap<int, Drawable> sorted = new Multimap<int, Drawable>();
+        MultiMap<int, Drawable> sorted = new MultiMap<int, Drawable>();
         List<Drawable> list = new List<Drawable>();
         private DrawOrder drawOrder;
-        MultiMap<Drawable> map = new MultiMap<Drawable>();
+        private DrawType dt;
 
         /// <summary>
         /// Initializes SpriteBatch class
         /// </summary>
-        public SpriteBatch(DrawOrder order)
+        public SpriteBatch(DrawOrder order, DrawType drawType = DrawType.BACKGROUND)
         {
             drawOrder = order;
+            dt = drawType;
         }
 
         /// <summary>
@@ -55,12 +56,14 @@ namespace Ecalia.Graphics
             {
                 
                 var keys = sorted.Keys.ToList();
-                keys.Sort();
+
+                if (dt == DrawType.OBJECTS)
+                    keys.Sort();
 
                 foreach (var key in keys)//sorted.Keys)
                 {
-                    Console.WriteLine("Key: {0}", key);
-                    foreach (Drawable d in sorted[key].Reverse().AsQueryable())
+                    //Console.WriteLine("Key: {0}", key);
+                    foreach (Drawable d in sorted[key])
                         Application.Window.Draw(d, RenderStates.Default);
                 } 
 
@@ -77,6 +80,14 @@ namespace Ecalia.Graphics
         {
             UNSORTED,
             SORTED
+        }
+
+        public enum DrawType
+        {
+            BACKGROUND,
+            TILES,
+            OBJECTS,
+            PLAYER
         }
     }
 }

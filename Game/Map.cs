@@ -1,8 +1,11 @@
 ﻿using Ecalia.Graphics;
 using Ecalia.Tools;
-using reWZ;
-using reWZ.WZProperties;
+using MapleLib.WzLib;
+using MapleLib.WzLib.WzProperties;
+using MapleLib.WzLib.WzStructure;
+
 using SFML.Graphics;
+using SFML.System;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,21 +21,19 @@ namespace Ecalia.Game
         private Background mapBackground;
         private MapObjects mapObjects;
         private MapTiles mapTiles;
-        private SpriteBatch backgrounds = new SpriteBatch(SpriteBatch.DrawOrder.UNSORTED);
-        private SpriteBatch images = new SpriteBatch(SpriteBatch.DrawOrder.SORTED);
-        private SpriteBatch tileset = new SpriteBatch(SpriteBatch.DrawOrder.UNSORTED);
+        List<Layer> images = new List<Layer>();
+        MultiMap<float, Sprite> objs = new MultiMap<float, Sprite>();
+        MultiMap<float, Sprite> tiles = new MultiMap<float, Sprite>();
+        SpriteBatch ob = new SpriteBatch(SpriteBatch.DrawOrder.UNSORTED, SpriteBatch.DrawType.OBJECTS);
+        SpriteBatch ti = new SpriteBatch(SpriteBatch.DrawOrder.SORTED, SpriteBatch.DrawType.TILES);
 
         // Wz 
-        protected WZFile mapFile = new WZFile(Path.Combine(Config.wzFolder, "Map.wz"), WZVariant.GMS, true); // I know I can do Path.Combine, but I don't really feel like it.
-        private WZImage mapImg;
-        private WZPointProperty origin;
-
-        // Lists
-        //Multimap<int, Sprite> backgrounds = new Multimap<int, Sprite>();
-        //Multimap<int, Sprite> objects = new Multimap<int, Sprite>();
-        //Multimap<int, Sprite> mtiles = new Multimap<int, Sprite>();
-        List<string> MapObjLocation = new List<string>();
-        
+        protected WzFile mapFile = new WzFile(Path.Combine(Config.wzFolder, "Map.wz"), WzMapleVersion.GMS);
+        //protected WZFile mapFile = new WZFile(Path.Combine(Config.wzFolder, "Map.wz"), WZVariant.GMS, true); // I know I can do Path.Combine, but I don't really feel like it.
+        //private WZImage mapImg;
+        private WzImage mapImg;
+        private WzVectorProperty origin;
+        //private WZPointProperty origin;
 
         // Events
 
@@ -52,9 +53,8 @@ namespace Ecalia.Game
                 mapId = 10000;
             else
                 mapId = id;
-
-
-            mapImg = mapFile.MainDirectory["Map"]["Map" + GetMapName(mapId)[0]][GetMapName(mapId) + ".img"] as WZImage; // Get's the Map Image
+            mapFile.ParseWzFile();
+            mapImg = mapFile["Map"]["Map" + GetMapName(mapId)[0]][GetMapName(mapId) + ".img"] as WzImage;//mapFile.MainDirectory["Map"]["Map" + GetMapName(mapId)[0]][GetMapName(mapId) + ".img"] as WZImage; // Get's the Map Image
 
             mapBackground = new Background();
             mapObjects = new MapObjects();
@@ -104,7 +104,7 @@ namespace Ecalia.Game
                 AddChild(ani[s].First());
                 ani[s].First().RunAction(new CCRepeatForever(animate[i]));
             }*/
-            
+
         }
 
         /// <summary>
@@ -116,6 +116,26 @@ namespace Ecalia.Game
             LoadBackground(mapImg);
             LoadTiles(mapImg);
             LoadObjects(mapImg);
+
+
+            
+
+            tiles.Keys.ToList().ForEach(k =>
+            {
+                tiles[k].ToList().ForEach(layer =>
+                {
+                    ti.AddChild(layer,(int)k);
+                });
+
+            });
+
+            objs.Keys.ToList().ForEach(k =>
+            {
+                objs[k].ToList().ForEach(layer =>
+                {
+                    ob.AddChild(layer, (int)k);
+                });
+            });
         }
 
         #region Background
@@ -124,27 +144,21 @@ namespace Ecalia.Game
         /// Loads the background for the map
         /// </summary>
         /// <param name="wzImage"></param>
-        private void LoadBackground(WZImage wzImage)
+        private void LoadBackground(WzImage wzImage)
         {
-            var background = wzImage["back"] as WZSubProperty;
+            var background = wzImage["back"] as WzSubProperty;
 
-            foreach (var back in background)
+            foreach (var back in background.WzProperties)
             {
-                //Console.WriteLine(back.Name);
-                var map = mapBackground.LoadFromNode((WZSubProperty)background[back.Name]);
-                WZCanvasProperty canvas = mapFile.MainDirectory["Back"][map.bS + ".img"]["back"][map.no.ToString()] as WZCanvasProperty;
+                var map = mapBackground.LoadFromNode((WzSubProperty)background[back.Name]);
+                WzCanvasProperty canvas = mapFile["Back"][map.bS + ".img"]["back"][map.no.ToString()] as WzCanvasProperty;//mapFile.MainDirectory["Back"][map.bS + ".img"]["back"][map.no.ToString()] as WZCanvasProperty;
                 var z = 0;
-                if (canvas.HasChild("origin"))
-                    origin = canvas["origin"] as WZPointProperty;
-                if (canvas.HasChild("z"))
-                    z = DataTool.GetInt(canvas["z"]);
+                //if (canvas.HasChild("origin"))
+                if (canvas["origin"] != null)
+                    origin = canvas["origin"] as MapleLib.WzLib.WzProperties.WzVectorProperty;
+                //if (canvas.HasChild("z"))
+                //z = DataTool.GetInt(canvas["z"]);
 
-                backgrounds.AddChild(new Sprite(Texture2D.LoadTexture(false, canvas.Value))
-                {
-                    Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
-                    Position = new SFML.System.Vector2f(map.x, map.y),
-                    Color = new Color(0xFF, 0xFF, 0xFF, (byte)map.a),
-                }, z);
 
             }
         }
@@ -157,20 +171,20 @@ namespace Ecalia.Game
         /// Loads Map Objects
         /// </summary>
         /// <param name="wzImage"></param>
-        private void LoadObjects(WZImage wzImage)
+        private void LoadObjects(WzImage wzImage)
         {
             for (int i = 0; i < 8; i++)
             {
                 var map = wzImage[i.ToString()]["obj"];
-                foreach (var obj in map)
+                foreach (var obj in map.WzProperties)
                 {
                     //Console.WriteLine(obj.Name);
-                    var mapobj = mapObjects.LoadFromNode((WZSubProperty)map[obj.Name]);
+                    var mapobj = mapObjects.LoadFromNode((WzSubProperty)map[obj.Name]);
                     //Console.WriteLine("{0}->{1}->{2}->{3}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2);
-                    var location = mapFile.MainDirectory["Obj"][mapobj.oS + ".img"][mapobj.l0][mapobj.l1][mapobj.l2];
-                    if (location.ChildCount > 1)
+                    var location = mapFile["Obj"][mapobj.oS + ".img"][mapobj.l0][mapobj.l1][mapobj.l2] as WzSubProperty;//mapFile.MainDirectory["Obj"][mapobj.oS + ".img"][mapobj.l0][mapobj.l1][mapobj.l2];
+                    if (location.WzProperties.Count > 1)
                     {
-                        foreach (var canvas in location)
+                        foreach (var canvas in location.WzProperties)
                         {
 
                             /*if (canvas.HasChild("z"))
@@ -181,11 +195,11 @@ namespace Ecalia.Game
                                     mapobj.z = mapobj.zM;
                             }*/
 
-                            if (canvas.HasChild("origin"))
-                                origin = canvas["origin"] as WZPointProperty;
+                            if (canvas["origin"] != null)
+                                origin = canvas["origin"] as WzVectorProperty;
 
                             //Console.WriteLine("{0}->{1}->{2}->{3}->{4}", mapobj.oS, mapobj.l0, mapobj.l1, mapobj.l2, canvas.Name);
-                            if (canvas is WZCanvasProperty) // TODO: Improve.
+                            if (canvas is WzCanvasProperty) // TODO: Improve.
                             {
                                 //MapObjLocation.Add(mapobj.oS + ":" + mapobj.l0 + ":" + mapobj.l1 + ":" + mapobj.l2);
                                 //Console.WriteLine(location.Name);
@@ -196,26 +210,25 @@ namespace Ecalia.Game
                     }
                     else
                     {
-                        foreach (var canvas in location)
+                        foreach (var canvas in location.WzProperties)
                         {
-                            if (canvas is WZCanvasProperty)
+                            if (canvas is WzCanvasProperty)
                             {
-                                /*if (canvas.HasChild("z"))
-                                {
-                                    if (DataTool.GetInt(canvas["z"]) == 0)
-                                        mapobj.z = mapobj.zM;
-                                    else
-                                        mapobj.z = DataTool.GetInt(canvas["z"]);
-                                }*/
+                                if (canvas["z"] != null)
+                                    mapobj.z = InfoTool.GetInt(canvas["z"]);
 
-                                if (canvas.HasChild("origin"))
-                                    origin = canvas["origin"] as WZPointProperty;
+                                if (canvas["origin"] != null)
+                                    origin = canvas["origin"] as WzVectorProperty;
 
-                                images.AddChild(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)canvas).Value))
+                                var z1 = mapobj.z;
+                                var z2 = mapobj.zM;
+                                var rz = z1 == z2 ? 0 : (z1 > z2 ? -1 : 1);
+
+                                objs.Add(i, new Sprite(Texture2D.LoadTexture(false, canvas.GetBitmap()))
                                 {
-                                    Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
-                                    Position = new SFML.System.Vector2f(mapobj.x, mapobj.y),
-                                }, mapobj.z);
+                                    Position = new Vector2f(mapobj.x, mapobj.y),
+                                    Origin = new Vector2f(InfoTool.GetFloat(origin.X), InfoTool.GetFloat(origin.Y)),
+                                });
                             }
                         }
                     }
@@ -227,41 +240,46 @@ namespace Ecalia.Game
 
         #region Tiles
 
-        private void LoadTiles(WZImage map)
+        private void LoadTiles(WzImage map)
         {
             for (int i = 0; i < 8; ++i) // Supposed to be 7..but I don't feel like changing it.
             {
                 //Console.WriteLine(i);
 
-                var tiles = map[i.ToString()]["tile"];
+                var tileobj = map[i.ToString()]["tile"];
                 //Console.WriteLine("Node: {0}", tiles.Name);
-                if (map[i.ToString()]["info"].HasChild("tS"))
+                if (map[i.ToString()]["info"]["tS"] != null)
                 {
-                    foreach (var tile in tiles)
+                    foreach (var tile in tileobj.WzProperties)
                     {
                         //Console.WriteLine("Tile: {0}", tile.Name);
-                        var mapTile = mapTiles.LoadFromNode((WZSubProperty)tiles[tile.Name]);
-                        mapTile.tS = DataTool.GetString(map[i.ToString()]["info"]["tS"]);
+                        var mapTile = mapTiles.LoadFromNode((WzSubProperty)tileobj[tile.Name]);
+                        mapTile.tS = InfoTool.GetString(map[i.ToString()]["info"]["tS"]);
                         //Console.WriteLine("{0}:{1}:{2}", mapTile.tS, mapTile.u, mapTile.no.ToString());
-                        var location = mapFile.MainDirectory["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];
+                        var location = mapFile["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];//mapFile.MainDirectory["Tile"][mapTile.tS + ".img"][mapTile.u][mapTile.no.ToString()];
 
-                        if (location is WZCanvasProperty)
+                        if (location is WzCanvasProperty)
                         {
                             //Console.WriteLine("{0}:{1}", mapTile.x, mapTile.y);
 
-                            if (location.HasChild("z"))
-                                mapTile.z = DataTool.GetInt(location["z"]);
-                            Console.WriteLine("Z: {0} ZM:{1}", mapTile.z, mapTile.zM);
+                            if (location["z"] != null)
+                                mapTile.z = InfoTool.GetInt((WzIntProperty)location["z"]);
 
-                            if (location.HasChild("origin"))
-                                origin = location["origin"] as WZPointProperty;
+                            var z1 = mapTile.z;
+                            var z2 = mapTile.zM;
+                            Console.WriteLine("Z1: {0} Z2: {1}", z1, z2);
+                            var rz = z1 == z2 ? 0 : (z1 > z2 ? -1 : mapTile.zM);
 
+                            //Console.WriteLine("Z: {0} ZM:{1}", mapTile.z, mapTile.zM);
 
-                            tileset.AddChild(new Sprite(Texture2D.LoadTexture(false, ((WZCanvasProperty)location).Value))
+                            if (location["origin"] != null)
+                                origin = location["origin"] as WzVectorProperty;
+                            tiles.Add(z1 / z2, new Sprite(Texture2D.LoadTexture(false, location.GetBitmap()))
                             {
-                                Origin = new SFML.System.Vector2f(origin.Value.X, origin.Value.Y),
-                                Position = new SFML.System.Vector2f(mapTile.x, mapTile.y),
-                            }, mapTile.z == 0 ? Math.Min(mapTile.z, 0) : Math.Max(-1, mapTile.zM));
+                                Position = new Vector2f(mapTile.x, mapTile.y),
+                                Origin = new Vector2f(InfoTool.GetFloat(origin.X), InfoTool.GetFloat(origin.Y)),
+                            });
+                            
                         }
                     }
                 }
@@ -272,16 +290,12 @@ namespace Ecalia.Game
 
         public void Draw()
         {
-            //backgrounds.Draw();
-            tileset.Draw();
-            //images.Draw();
+            ti.Draw();
+            ob.Draw();
         }
 
         public void Dispose()
         {
-            backgrounds.Dispose();
-            tileset.Dispose();
-            images.Dispose();
             mapFile.Dispose();
         }
 
@@ -336,23 +350,23 @@ namespace Ecalia.Game
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        internal Background LoadFromNode(WZSubProperty node)
+        internal Background LoadFromNode(WzSubProperty node)
         {
             var back = new Background()
             {
-                a = node["a"].ValueOrDie<int>(),
-                ani = node["ani"].ValueOrDie<int>(),
-                bS = node["bS"].ValueOrDie<string>(),
-                cx = node["cx"].ValueOrDie<int>(),
-                cy = node["cy"].ValueOrDie<int>(),
-                flipped = node["f"].ValueOrDie<int>(),
-                front = node["front"].ValueOrDie<int>(),
-                no = node["no"].ValueOrDie<int>(),
-                rx = node["rx"].ValueOrDie<int>(),
-                ry = node["ry"].ValueOrDie<int>(),
-                type = node["type"].ValueOrDie<int>(),
-                x = node["x"].ValueOrDie<int>(),
-                y = node["y"].ValueOrDie<int>(),
+                a = InfoTool.GetInt(node["a"]),//node["a"].ValueOrDie<int>(),
+                ani = InfoTool.GetInt(node["ani"]),
+                bS = InfoTool.GetString(node["bS"]),
+                cx = InfoTool.GetInt(node["cx"]),
+                cy = InfoTool.GetInt(node["cy"]),
+                flipped = InfoTool.GetInt(node["f"]),
+                front = InfoTool.GetInt(node["front"]),
+                no = InfoTool.GetInt(node["no"]),
+                rx = InfoTool.GetInt(node["rx"]),
+                ry = InfoTool.GetInt(node["ry"]),
+                type = InfoTool.GetInt(node["type"]),
+                x = InfoTool.GetInt(node["x"]),
+                y = InfoTool.GetInt(node["y"]),
                 //zM = DataTool.GetInt(node["zM"]),
             };
             return back;
@@ -387,7 +401,7 @@ namespace Ecalia.Game
         public int flipped { get; set; } // Flipped
         public int x { get; set; } // x-pos of the image.
         public int y { get; set; } // y-pos of the image.
-        public int z { get; set; } // z-pos of the image.
+        public float z { get; set; } // z-pos of the image.
         public int zM { get; set; } // I have no idea...
 
         public MapObjects()
@@ -400,19 +414,19 @@ namespace Ecalia.Game
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        internal MapObjects LoadFromNode(WZSubProperty node)
+        internal MapObjects LoadFromNode(WzSubProperty node)
         {
             var obj = new MapObjects()
             {
-                oS = DataTool.GetString(node["oS"]),
-                l0 = DataTool.GetString(node["l0"]),
-                l1 = DataTool.GetString(node["l1"]),
-                l2 = DataTool.GetString(node["l2"]),
-                x = DataTool.GetInt(node["x"]),
-                y = DataTool.GetInt(node["y"]),
-                z = DataTool.GetInt(node["z"]),
-                flipped = DataTool.GetInt(node["f"]),
-                zM = DataTool.GetInt(node["zM"]),
+                oS = InfoTool.GetString(node["oS"]),
+                l0 = InfoTool.GetString(node["l0"]),
+                l1 = InfoTool.GetString(node["l1"]),
+                l2 = InfoTool.GetString(node["l2"]),
+                x = InfoTool.GetInt(node["x"]),
+                y = InfoTool.GetInt(node["y"]),
+                z = InfoTool.GetInt(node["z"]),
+                flipped = InfoTool.GetInt(node["f"]),
+                zM = InfoTool.GetInt(node["zM"]),
             };
 
             return obj;
@@ -433,7 +447,7 @@ namespace Ecalia.Game
         public int y { get; set; } // Y-Pos
         public string u { get; set; } // the sub folder
         public int no { get; set; } // The node that contains the image
-        public int z { get; set; }
+        public float z { get; set; }
         public int zM { get; set; } // still don't know what this....
         public string tS { get; set; } // TileSet
 
@@ -442,16 +456,16 @@ namespace Ecalia.Game
 
         }
 
-        internal MapTiles LoadFromNode(WZSubProperty node)
+        internal MapTiles LoadFromNode(WzSubProperty node)
         {
             var tile = new MapTiles()
             {
                 //tS = DataTool.GetString(node["info"]["tS"]),
-                x = DataTool.GetInt(node["x"]),
-                y = DataTool.GetInt(node["y"]),
-                u = DataTool.GetString(node["u"]),
-                no = DataTool.GetInt(node["no"]),
-                zM = DataTool.GetInt(node["zM"]),
+                x = InfoTool.GetInt(node["x"]),
+                y = InfoTool.GetInt(node["y"]),
+                u = InfoTool.GetString(node["u"]),
+                no = InfoTool.GetInt(node["no"]),
+                zM = InfoTool.GetInt(node["zM"]),
             };
 
             return tile;

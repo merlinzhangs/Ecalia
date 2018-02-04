@@ -33,7 +33,7 @@ namespace Ecalia.Tools
     /// </summary>
     /// <typeparam name="TKey">The type of key.</typeparam>
     /// <typeparam name="TValue">The type of value.</typeparam>
-    public class Multimap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, ICollection<TValue>>>
+    public class MultiMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, ICollection<TValue>>>
     {
         private readonly Dictionary<TKey, ICollection<TValue>> items = new Dictionary<TKey, ICollection<TValue>>();
 
@@ -199,7 +199,7 @@ namespace Ecalia.Tools
         }
     }
 
-    public class MultiMap<V>
+    public class MultiDictionary<V>
     {
         // 1
         Dictionary<string, List<V>> _dictionary =
